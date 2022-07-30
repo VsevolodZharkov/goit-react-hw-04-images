@@ -1,94 +1,157 @@
 import { Searchbar } from './components/Searchbar/Searchbar';
 import { ImageGallery } from './components/ImageGallery/ImageGallery';
 import { Modal } from './components/Modal/Modal';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './components/Button/Button';
 import { STATUS } from './Status/Status';
 import { ToastContainer } from 'react-toastify';
 import { Fetch } from './Fecth/Fetch';
 import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [isOpen, setisOpen] = useState(false);
+  const [status, setStatus] = useState(STATUS.Idle);
+  const [page, setPage] = useState(1);
+  const [totalHits, setTotalHits] = useState(null);
+  const [imgBigItem, setImgBigItem] = useState({});
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    isOpen: false,
-    status: STATUS.Idle,
-    page: 1,
-    totalHits: null,
-    imgBigItem: {},
-  };
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.query !== this.state.query
-      // || prevState.page !== this.state.page
-    ) {
-      this.setState({ status: STATUS.Loading });
-
-      Fetch(this.state.query, this.state.page)
-        .then(data => {
-          this.setState({
-            images: data.hits,
-            status: STATUS.Success,
-            totalHits: data.totalHits,
-          });
-        })
-        .catch(() => {
-          this.setState({ status: STATUS.Error });
-        });
+  useEffect(() => {
+    if (!query) {
+      return;
     }
-  }
+    setStatus(STATUS.Loading);
+    Fetch(query, page)
+      .then(responce => {
+        setImages(responce.hits);
+				setStatus(STATUS.Success)
+				setTotalHits(responce.totalHits)
+      })
+      .catch(() => {
+        setStatus(STATUS.Error);
+      });
+  }, [page, query]);
 
-  handelLoadMore = () => {
-		this.setState(prevState => ({ page: prevState.page + 1 }));
-    Fetch(this.state.query, this.state.page + 1)
-		.then(responce => { this.setState(ps => ({
-        images: [...ps.images, ...responce.hits],
-      }))
-    })
+  const handelLoadMore = () => {
+		setPage(ps => ps + 1);
+    Fetch(query, page + 1)
+		.then(responce => { 
+			setImages([...images, ...responce.hits])
+		})
 		.catch(() => {
-			this.setState({ status: STATUS.Error });
+			setStatus(STATUS.Error);
 		});
-   
+	}
+  const handelSubmit = query => {
+    setQuery(query);
+    setPage(1);
   };
 
-  handelSubmit = query => {
-    this.setState({ query, page: 1 });
+  const openModal = imgBig => {
+    setisOpen(ps => !ps.isOpen);
+    setImgBigItem(imgBig);
   };
 
-  openModal = imgBig => {
-    this.setState(prevDtate => ({ isOpen: !prevDtate.isOpen }));
-    this.setState({ imgBigItem: imgBig });
+  const onClose = () => {
+    setisOpen(ps => !ps.isOpen);
   };
 
-  onClose = () => {
-    this.setState(prevDtate => ({ isOpen: !prevDtate.isOpen }));
-  };
+  return (
+    <div>
+      <Searchbar onSubmit={handelSubmit} />
+      <ToastContainer />
+      <ImageGallery openModal={openModal} images={images} status={status} />
+      {status === STATUS.Loading
+        ? ''
+        : !!totalHits &&
+          totalHits >= page * 12 && (
+            <Button handelLoadMore={handelLoadMore} />
+          )}
+      {isOpen && <Modal imgBigItem={imgBigItem} onClose={onClose} />}
+    </div>
+  );
+};
+// export class oldApp extends Component {
+//   state = {
+//     images: [],
+//     query: '',
+//     isOpen: false,
+//     status: STATUS.Idle,
+//     page: 1,
+//     totalHits: null,
+//     imgBigItem: {},
+//   };
 
-  render() {
-    const { page, totalHits, isOpen, status } = this.state;
+//   componentDidUpdate(prevProps, prevState) {
+//     if (
+//       prevState.query !== this.state.query
+//       // || prevState.page !== this.state.page
+//     ) {
+//       this.setState({ status: STATUS.Loading });
 
-    return (
-      <div>
-        <Searchbar onSubmit={this.handelSubmit} />
-        <ToastContainer />
-        <ImageGallery
-          openModal={this.openModal}
-          images={this.state.images}
-          status={this.state.status}
-        />
-        {status === STATUS.Loading
-          ? ''
-          : !!totalHits &&
-            totalHits >= page * 12 && (
-              <Button handelLoadMore={this.handelLoadMore} />
-            )}
-        {isOpen && (
-          <Modal imgBigItem={this.state.imgBigItem} onClose={this.onClose} />
-        )}
-      </div>
-    );
-  }
-}
+//       Fetch(this.state.query, this.state.page)
+//         .then(data => {
+//           this.setState({
+//             images: data.hits,
+//             status: STATUS.Success,
+//             totalHits: data.totalHits,
+//           });
+//         })
+//         .catch(() => {
+//           this.setState({ status: STATUS.Error });
+//         });
+//     }
+//   }
+
+  // handelLoadMore = () => {
+	// 	this.setState(prevState => ({ page: prevState.page + 1 }));
+  //   Fetch(this.state.query, this.state.page + 1)
+	// 	.then(responce => { this.setState(ps => ({
+  //       images: [...ps.images, ...responce.hits],
+  //     }))
+  //   })
+	// 	.catch(() => {
+	// 		this.setState({ status: STATUS.Error });
+	// 	});
+
+//   };
+
+//   handelSubmit = query => {
+//     this.setState({ query, page: 1 });
+//   };
+
+//   openModal = imgBig => {
+//     this.setState(prevDtate => ({ isOpen: !prevDtate.isOpen }));
+//     this.setState({ imgBigItem: imgBig });
+//   };
+
+//   onClose = () => {
+//     this.setState(prevDtate => ({ isOpen: !prevDtate.isOpen }));
+//   };
+
+//   render() {
+//     const { page, totalHits, isOpen, status } = this.state;
+
+//     return (
+//       <div>
+//         <Searchbar onSubmit={this.handelSubmit} />
+//         <ToastContainer />
+//         <ImageGallery
+//           openModal={this.openModal}
+//           images={this.state.images}
+//           status={this.state.status}
+//         />
+//         {status === STATUS.Loading
+//           ? ''
+//           : !!totalHits &&
+//             totalHits >= page * 12 && (
+//               <Button handelLoadMore={this.handelLoadMore} />
+//             )}
+//         {isOpen && (
+//           <Modal imgBigItem={this.state.imgBigItem} onClose={this.onClose} />
+//         )}
+//       </div>
+//     );
+//   }
+// }
