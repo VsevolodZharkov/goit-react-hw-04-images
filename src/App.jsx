@@ -8,12 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import { Fetch } from './Fecth/Fetch';
 import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
+
 export const App = () => {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState('');
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState(STATUS.Idle);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1);// use
   const [totalHits, setTotalHits] = useState(null);
   const [imgBigItem, setImgBigItem] = useState({});
 
@@ -31,30 +32,32 @@ export const App = () => {
       .catch(() => {
         setStatus(STATUS.Error);
       });
-  }, [page, query]);
+  }, [query]);
 
   const handelLoadMore = () => {
-		setPage(ps => ps + 1);
     Fetch(query, page + 1)
 		.then(responce => { 
-			setImages([...images, ...responce.hits])
+			setPage(ps => ps + 1);
+			setImages(ps => [...ps, ...responce.hits])
 		})
 		.catch(() => {
 			setStatus(STATUS.Error);
 		});
 	}
+
   const handelSubmit = query => {
     setQuery(query);
     setPage(1);
   };
 
   const openModal = imgBig => {
-    setisOpen(ps => !ps.isOpen);
+    setIsOpen(ps => !ps);
     setImgBigItem(imgBig);
   };
 
   const onClose = () => {
-    setisOpen(ps => !ps.isOpen);
+    setIsOpen(ps => !ps);
+		console.log('in App');
   };
 
   return (

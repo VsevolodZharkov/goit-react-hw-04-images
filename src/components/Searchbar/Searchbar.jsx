@@ -1,45 +1,43 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
 import Style from '../../components/Searchbar/Searchbar.module.css'
-export class Searchbar extends Component {
-  state = {
-		query: '',
-	}
 
-	clearQuery = () => {
-		this.setState({query: ''})
+export const Searchbar = ({onSubmit}) => {
+	const [query, setQuery] = useState('')
+
+	const clearQuery = () => {
+		setQuery('');
 		document.getElementById('form').reset();
 	}
 
-	handeleChange = event => {
-		this.setState({query: event.target.value})
+	const handeleChange = event => {
+		setQuery(event.target.value)
 	}
-	handelSubmit = event => {
+
+	const handelSubmit = event => {
 		event.preventDefault();
-		if(this.state.query.trim() === ''){
+		if(query.trim() === ''){
 			toast.error('Fill input')
 			return 
 		}
-		const { onSubmit } = this.props;
-		onSubmit(this.state.query)
-		this.clearQuery()
+		onSubmit(query)
+		clearQuery()
 	}
 	
-	render() {
     return (
       <header className={Style.Searchbar}>
         <form className={Style.SearchForm} id='form'>
           <button
             type="submit"
             className={Style.SearchFormButton}
-            onClick={this.handelSubmit}
+            onClick={handelSubmit}
           >
             <span className={Style.SearchFormButtonLabel}>Search</span>
           </button>
 
           <input
-						onChange={this.handeleChange}
+						onChange={handeleChange}
             className={Style.SearchFormInput}
             type="text"
             placeholder="Search images and photos"
@@ -47,8 +45,54 @@ export class Searchbar extends Component {
         </form>
       </header>
     )
-  }
 }
 Searchbar.propsTypes = {
 	onSubmit: PropTypes.func.isRequired,
 }
+// export class oldSearchbar extends Component {
+//   state = {
+// 		query: '',
+// 	}
+
+// 	clearQuery = () => {
+// 		this.setState({query: ''})
+// 		document.getElementById('form').reset();
+// 	}
+
+// 	handeleChange = event => {
+// 		this.setState({query: event.target.value})
+// 	}
+// 	handelSubmit = event => {
+// 		event.preventDefault();
+// 		if(this.state.query.trim() === ''){
+// 			toast.error('Fill input')
+// 			return 
+// 		}
+// 		const { onSubmit } = this.props;
+// 		onSubmit(this.state.query)
+// 		this.clearQuery()
+// 	}
+	
+// 	render() {
+//     return (
+//       <header className={Style.Searchbar}>
+//         <form className={Style.SearchForm} id='form'>
+//           <button
+//             type="submit"
+//             className={Style.SearchFormButton}
+//             onClick={this.handelSubmit}
+//           >
+//             <span className={Style.SearchFormButtonLabel}>Search</span>
+//           </button>
+
+//           <input
+// 						onChange={this.handeleChange}
+//             className={Style.SearchFormInput}
+//             type="text"
+//             placeholder="Search images and photos"
+//           />
+//         </form>
+//       </header>
+//     )
+//   }
+// }

@@ -1,14 +1,12 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 export const Modal = ({ imgBigItem, onClose }) => {
-  const handelCloseModal = useCallback(
-    event => {
+
+  const handelCloseModal = event => {
       if (event.code === 'Escape' || event.target.className === 'Overlay') {
         onClose();
       }
-    },
-    [onClose]
-  );
+    };
 		
   useEffect(() => {
     window.addEventListener('keydown', handelCloseModal);
@@ -17,7 +15,7 @@ export const Modal = ({ imgBigItem, onClose }) => {
       window.removeEventListener('keydown', handelCloseModal);
       window.removeEventListener('click', handelCloseModal);
     };
-  }, [handelCloseModal]);
+  });
 
   return (
     <div className="Overlay">
