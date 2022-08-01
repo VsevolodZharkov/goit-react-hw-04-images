@@ -1,7 +1,7 @@
 import { Searchbar } from './components/Searchbar/Searchbar';
 import { ImageGallery } from './components/ImageGallery/ImageGallery';
 import { Modal } from './components/Modal/Modal';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from './components/Button/Button';
 import { STATUS } from './Status/Status';
 import { ToastContainer } from 'react-toastify';
@@ -14,7 +14,8 @@ export const App = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState(STATUS.Idle);
-  const [page, setPage] = useState(1);// use
+	const page = useRef(1);
+  // const [page, setPage] = useState(1);// use
   const [totalHits, setTotalHits] = useState(null);
   const [imgBigItem, setImgBigItem] = useState({});
 
@@ -35,9 +36,9 @@ export const App = () => {
   }, [query]);
 
   const handelLoadMore = () => {
-    Fetch(query, page + 1)
+    Fetch(query, page.current + 1)
 		.then(responce => { 
-			setPage(ps => ps + 1);
+			page.current += 1;
 			setImages(ps => [...ps, ...responce.hits])
 		})
 		.catch(() => {
@@ -47,7 +48,7 @@ export const App = () => {
 
   const handelSubmit = query => {
     setQuery(query);
-    setPage(1);
+    page.current = 1;
   };
 
   const openModal = imgBig => {
@@ -68,7 +69,7 @@ export const App = () => {
       {status === STATUS.Loading
         ? ''
         : !!totalHits &&
-          totalHits >= page * 12 && (
+          totalHits >= page.current * 12 && (
             <Button handelLoadMore={handelLoadMore} />
           )}
       {isOpen && <Modal imgBigItem={imgBigItem} onClose={onClose} />}
